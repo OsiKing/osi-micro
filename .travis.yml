@@ -19,7 +19,6 @@ before_script:
 
 script:
   - docker --version # print the version for logging
-  - ./build_images.sh
 
 after_success:
   - docker images
