@@ -1,43 +1,30 @@
-language: minimal
+language: node_js
+node_js:
+  - 13
 
-services: docker
+branches:
+  only:
+  - main
 
-stages:
-  - build
-  - test
-  - name: deploy
-    if: branch = main
+services:
+  - docker
 
-env:
-  global:
-    - DOCKER_COMPOSE_VERSION=1.23.2
-    - CLUSTER_NAME=udagram-cluster
+# Pre-testing installs
+install:
+  - echo "nothing needs to be installed"
 
-before_install:
-  - docker -v && docker-compose -v 
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-  - echo 'docker-compose installed and configured'
-  - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-  - chmod +x ./kubectl
-  - sudo mv ./kubectl /usr/local/bin/kubectl
-  - echo 'kubectl installed and configured'
+# Scripts to be run such as tests
+before_script:
+  - echo "no tests"
+
+script:
+  - docker --version # print the version for logging
+  - ./build_images.sh
+
+after_success:
+  - docker images
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - echo 'dockerhub credentials configured'
-
-jobs:
-  include:
-    - stage: build
-      script:
-      - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.prod.yaml build --parallel
-      - chmod +x ./scripts/push_images.sh && ./scripts/push_images.sh
-    - stage: test
-      script:
-      - echo 'run unit tests ..'
-    - stage: deploy
-      script:
-      - aws eks --region ${AWS_REGION} describe-cluster --name ${CLUSTER_NAME} --query cluster.status
-      - aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}
-      - chmod +x ./scripts/deploy_k8s.sh && ./scripts/deploy_k8s.sh
+  - docker push reverse-proxy
+  - docker push udagram-api-users
+  - docker push udagram-frontend
+  - docker push udagram-api-feeds
