@@ -19,12 +19,11 @@ before_script:
 
 script:
   - docker --version # print the version for logging
-  - ./build_images.sh
 
 after_success:
   - docker images
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker push reverse-proxy
-  - docker push udagram-api-users
-  - docker push udagram-frontend
-  - docker push udagram-api-feeds
+  - docker push osiking/reverse-proxy
+  - docker push osiking/udagram-api-users
+  - docker push osiking/udagram-frontend
+  - docker push osiking/udagram-api-feeds
