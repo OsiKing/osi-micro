@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feeds-app
+  labels:
+    app: feeds-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feeds-app
+  template:
+    metadata:
+      labels:
+        app: feeds-app
+    spec:
+      containers:
+      - name: udagram-api-feeds
+        image: osi/udagram-api-feeds
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 60
