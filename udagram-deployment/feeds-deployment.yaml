@@ -15,7 +15,7 @@ spec:
         service: backend-feed
     spec:
       containers:
-      - image: docker.io/osiking/udacity-restapi-feed
+      - image: osiking/udagram-api-feed:v1
         name: backend-feed
         imagePullPolicy: Always  
         resources:
